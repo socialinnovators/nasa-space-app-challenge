@@ -1,0 +1,21 @@
+var message = ' {{.Level}}: Rain Monitoring Alert  '
+
+var details = 'Hi,As per todays weather forecast it appears that it may rain for next three days in Tumkur.Hence please update your package of practices plan for farmers of Tumkur accordingly.'
+
+stream
+    |from()
+        .database('weather')
+        .retentionPolicy('autogen')
+        .measurement('dailyWeather')
+        .where(lambda: "precipType" == 'rain' OR "icon" == 'rain')
+    |eval(lambda: "temperature", lambda: "humidity", lambda: "windSpeed", lambda: "summary")
+        .as('temperature', 'humidity', 'windSpeed', 'summary')
+    |log()
+    |alert()
+        .crit(lambda: TRUE)
+        .message(message)
+        .details(details)
+        .id('RAIN ALERT')
+        .email()
+        .to('sureshbtech45@gmail.com')
+    |log()
